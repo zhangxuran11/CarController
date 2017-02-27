@@ -11,7 +11,6 @@ IODeviceListener::IODeviceListener(QObject *parent) :
     QObject(parent),cs1(CS1_GPIO,GPIO::H),cs2(CS2_GPIO,GPIO::H),cs3(CS3_GPIO,GPIO::H),
     cs4(CS4_GPIO,GPIO::H),slm1(SLM1_GPIO,GPIO::L),slm2(SLM2_GPIO,GPIO::L)
 {
-    carId = ZTools::getCarID();
     cs_slm_timer_id = startTimer(1000);
     if(cs_slm_timer_id == 0)
         qDebug("Create cs_slm_timer_id failed !!");
@@ -101,7 +100,7 @@ void IODeviceListener::onCsSlmTimeout()
     static ZTPManager* comZtpManager = new ZTPManager;
     ZTPprotocol ztp;
     ztp.addPara("T","SLM_STATE");
-    ztp.addPara("CAR_ID",QString::number( carId));//车厢号
+    ztp.addPara("CAR_ID",QString::number( ZTools::getCarID()));//车厢号
 //    ztp.addPara("CAR_ID",QString::number( 14));//车厢号
     ztp.addPara("SLM1",sta_slm1);
     ztp.addPara("SLM2",sta_slm2);
@@ -109,7 +108,7 @@ void IODeviceListener::onCsSlmTimeout()
 
     ztp.clear();
     ztp.addPara("T","CS_STATE");
-    ztp.addPara("CAR_ID",QString::number( carId));//车厢号
+    ztp.addPara("CAR_ID",QString::number( ZTools::getCarID()));//车厢号
     ztp.addPara("CS1",sta_cs1);
     ztp.addPara("CS2",sta_cs2);
     ztp.addPara("CS3",sta_cs3);

@@ -74,7 +74,7 @@ CQplayerGUI::CQplayerGUI(QWidget *parent) :
     connect(switchLanguage,SIGNAL(timeout()),this,SLOT(refresh()));
     switchLanguage->start();
     cqAudio = NULL;
-    versionCtrl = new VersionSender("CarController",1,1,12,ZTools::getCarID());
+    versionCtrl = new VersionSender("CarController",1,1,12);
     ui->setupUi(this);
 
     ztpmForTest = new ZTPManager(8319,QHostAddress("224.102.228.40"));
@@ -140,7 +140,7 @@ void CQplayerGUI::slot_procTestZtp()
 {
     ZTPprotocol ztp;
     ztpmForTest->getOneZtp(ztp);
-    if(ztp.getPara("T") == "TEST" && ztp.getPara("CARID").toInt() == GlobalInfo::getInstance()->carId &&  ztp.getPara("DEV") == "CAR"
+    if(ztp.getPara("T") == "TEST" && ztp.getPara("CARID").toInt() == ZTools::getCarID() &&  ztp.getPara("DEV") == "CAR"
             &&  ztp.getPara("CMD") == "EXIT_WORKTHREAD")
     {
         versionCtrl->setTestOffline();

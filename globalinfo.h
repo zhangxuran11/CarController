@@ -20,7 +20,6 @@ public:
     ZDebugCallStack debugStack;
     WorkThread* workThread;
     int train_id;
-    int carId;
     QString VServerIP;
     QString sysCtlIp;
     static GlobalInfo* getInstance();

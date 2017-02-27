@@ -10,8 +10,14 @@ VServerCtrl::VServerCtrl()
     ztpm = new ZTPManager(8321,QHostAddress("224.102.228.40"));
     connect(ztpm,SIGNAL(readyRead()),this,SLOT(slot_recvReqFromVideo()));
 }
+static int send_cnt = 0;
 void VServerCtrl::slot_sendVCtrl()
 {
+    if(--send_cnt >= 0) //允许失败三次
+    {
+        timerSendVCtrl.stop();
+        return;
+    }
     ZTPprotocol ztp;
     ztp.addPara("T","VideoCtrl");
     ztp.addPara("CMD",cmd);
@@ -28,6 +34,7 @@ void VServerCtrl::slot_recvReqFromVideo()
 }
 void VServerCtrl::pausedServer(QString from)
 {
+    send_cnt = 3;
     this->cmd="V-PAUSED";
     this->from = from;
     slot_sendVCtrl();
@@ -36,6 +43,7 @@ void VServerCtrl::pausedServer(QString from)
 }
 void VServerCtrl::playServer()
 {
+    send_cnt = 3;
     cmd="V-PLAY";
     slot_sendVCtrl();
     timerSendVCtrl.setInterval(1000);

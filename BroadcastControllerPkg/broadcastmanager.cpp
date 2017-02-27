@@ -2,7 +2,7 @@
 #include"trainstateparser.h"
 #include"railwaystateparser.h"
 #include"callstateparser.h"
-#include"qextserialport.h"
+#include "qextserialport/src/qextserialport.h"
 #include<QThread>
 #include<iostream>
 #include<stdio.h>
@@ -27,7 +27,7 @@ void BroadcastManager::sendTrainState()
 {
     TrainStateParser parser;
     parser.systemDateTime = QDateTime::currentDateTime();
-    parser.carID = carId;
+    parser.carID = ZTools::getCarID();
     parser.trainID = trainId;
     if(isPwdCar)
         parser.trainID |= 0x80000000;
@@ -65,7 +65,6 @@ BroadcastManager::BroadcastManager(const QString &serialName)
     start_f = false;
 
     trainId = 0;
-    carId = ZTools::getCarID();
     speed = 0;
 
     startStationEN = "START";

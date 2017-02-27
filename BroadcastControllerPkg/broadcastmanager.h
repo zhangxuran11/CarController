@@ -31,7 +31,6 @@ private slots:
 public:
     QDateTime dateTime;
     int trainId;
-    int carId;
     float speed;
 
     QString startStationEN;  //始发站英文版

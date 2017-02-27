@@ -13,15 +13,18 @@ SoftWatchdog::SoftWatchdog(QObject *ressourceObj,void (*method)(),QObject *paren
     timer->start();
     connect(timer,SIGNAL(timeout()),this,SLOT(cleanUp()));
 }
+static bool b = true;
 void SoftWatchdog::cleanUp()
 {
     deal();
+    b = false;
 //    delete obj;
-//    delete timer;
-//    delete this;
+ //   delete timer;
+ //   delete this;
 }
 void SoftWatchdog::feed()
 {
-    timer->start(elapse);
+    if(b)
+        timer->start(elapse);
 }
 

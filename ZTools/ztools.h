@@ -21,7 +21,9 @@ public:
     static quint64 ascii2hex(const char *ascii,int len);
     static QByteArray readLineFromFile(const QString& fileName,int lineNo);
     static void msleep(int msecs);
+    static int getCarGlobalID();
     static int getCarID();
+    static void setCarID(int carID);
     static int getCarID_bk();
     static QByteArray str2unicode(QString str);
 

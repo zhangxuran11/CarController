@@ -18,7 +18,6 @@ private:
     GPIO slm2;  //打开－－高电平－－有效
     //QTimer* cs_slm_Timer;
     int cs_slm_timer_id;
-    int carId;
 
 protected:
     void timerEvent(QTimerEvent *event);

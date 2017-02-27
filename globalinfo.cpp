@@ -19,7 +19,6 @@ GlobalInfo::GlobalInfo(QObject *parent) :
         sysCar = "1";
     }
     train_id = -1;
-    carId = ZTools::getCarID();
     VServerIP = "";
     sysCtlIp = "";
     vServerCtrl = new VServerCtrl;

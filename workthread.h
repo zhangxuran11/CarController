@@ -10,6 +10,7 @@ class SoftWatchdog;
 class WorkThread : public QThread
 {
     Q_OBJECT
+    QTimer* car_id_map_timer;
     ModbusManager*  modbusManager;
     SoftWatchdog* modbusDog;
     SoftWatchdog* comSoftDog;
@@ -32,6 +33,7 @@ private slots:
     void recvModbus();
     void recvSysIp();
     void recvCarrierHeartTimeout();
+    void send_car_id_map();
 protected:
     void timerEvent(QTimerEvent * event );
 

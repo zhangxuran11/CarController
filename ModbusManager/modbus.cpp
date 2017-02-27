@@ -51,17 +51,13 @@ void Modbus::load(QByteArray pkg)
 //        qDebug("__length__ %d",pkg.length());
 //        qDebug("__LRC__ %d",LRC);
     }
-    quint16 res = 0;
     if(datCount != datList.length())
-        goto end;
+        return;
     rawData = pkg;
-    res = calCLR();
+    quint16 res = calCLR();
 //    qDebug()<<"calCLR= "<<res;
     isValid = LRC == res;
-end:
-//    if(!isValid)
-//        print();
-    return;
+
 }
 typedef unsigned char UCHAR;
 typedef unsigned short USHORT;

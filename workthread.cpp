@@ -14,7 +14,7 @@
 #include"softwatchdog.h"
 static int debug = 0;
 static int sendTempTimerId = 0;
-static float temp = 0;
+static float temp = 25;
 //static float outTemp = 0;
 static void comDeal();
 static void proBroadSignal(bool broadSignal);
@@ -116,18 +116,14 @@ void WorkThread::ztpBroadcastProc()
         }
         if(comBroadcastManager != NULL)
         {
-            static unsigned int cnt = 0;
-            cnt++;
             comBroadcastManager->dateTime = QDateTime::fromString(ztp.getPara("DateTime"),"yy-MM-dd hh:mm:ss");
             comBroadcastManager->speed = ztp.getPara("Speed").toFloat();
             comBroadcastManager->trainId = ztp.getPara("TrainNum").toInt();
-            comBroadcastManager->carId = ZTools::getCarID();
-            if(1 || cnt > 10) {
-                comBroadcastManager->startStationEN = ztp.getPara("StartStation");
-                comBroadcastManager->endStationEN = ztp.getPara("EndStation");
-                comBroadcastManager->startStationThai = ztp.getPara("StartStation_th");
-                comBroadcastManager->endStationThai = ztp.getPara("EndStation_th");
-            }
+
+            comBroadcastManager->startStationEN = ztp.getPara("StartStation");
+            comBroadcastManager->endStationEN = ztp.getPara("EndStation");
+            comBroadcastManager->startStationThai = ztp.getPara("StartStation_th");
+            comBroadcastManager->endStationThai = ztp.getPara("EndStation_th");
             comBroadcastManager->start();
 
            if(debug)
@@ -146,7 +142,7 @@ void WorkThread::ztpBroadcastProc()
         bool broadSignal = false;
         if(ztp.getPara("HasBroadcast") == "Y" ||
                 (ztp.getPara("HasBroadcast_lc") == "Y" &&
-                 ztp.getPara("CarId").toInt() == GlobalInfo::getInstance()->carId ))
+                 ztp.getPara("CarId").toInt() == ZTools::getCarID() ))
         {
            broadSignal = true;
         }
@@ -229,7 +225,7 @@ void WorkThread::comBroadcastProc()
     else
         tmp = "N";
     ztp.addPara("HasBroadcast_lc",tmp);
-    ztp.addPara("CarId",QString::number(GlobalInfo::getInstance()->carId));
+    ztp.addPara("CarId",QString::number(ZTools::getCarID()));
     ztpm->SendOneZtp(ztp,QHostAddress(BROADCAST_IP),8310);
 //    qDebug()<<"==========================  IPC  "<<ipcChannel;
     procCall(ipcChannel);
@@ -331,7 +327,7 @@ static void comDeal()
 
 static void modbusDeal()
 {
-    temp = 0;
+    temp = 25;
 //    outTemp = 0;
     if(GlobalInfo::getInstance()->VServerIP != "")
     {
@@ -360,7 +356,7 @@ void WorkThread::test()
     static ZTPManager* ztpm = new ZTPManager;
     ZTPprotocol ztp;
     ztp.addPara("T","T_UCall");
-    ztp.addPara("CarId",QString::number(GlobalInfo::getInstance()->carId));
+    ztp.addPara("CarId",QString::number(ZTools::getCarID()));
     ztp.addPara("ChId",QString::number(ipcChannel));
     ztpm->SendOneZtp(ztp,QHostAddress("224.102.228.40"),12350);
     ztp.print();
@@ -404,6 +400,11 @@ void WorkThread::recvModbus()
     if(_ac->datList.length() == 8)
     {
         temp = _ac->datList[4]*0.1-30;
+        int carID = _ac->datList[0];
+        if(carID != ZTools::getCarID())
+        {
+            ZTools::setCarID(carID);
+        }
 //        outTemp = _ac->datList[5]*0.1-30;
 //        qDebug()<<"out temp = "<<outTemp;
     }
@@ -412,16 +413,30 @@ void WorkThread::recvModbus()
     acr.code = _ac->code;
     acr.regAddr = _ac->regAddr;
     acr.datCount = _ac->datCount;
-    usleep(20000);
-//    _ac->print();
-    modbusManager->SendOneModbus(acr);
+    //usleep(20000);;
+    //modbusManager->SendOneModbus(acr);
+
 //    qDebug()<<"regAddr : "<<acr.regAddr;
     delete _ac;
     //delete ztpm;
 //    GlobalInfo::getInstance()->debugStack.appendStack(QThread::currentThreadId(),"leave recvModbus");
 }
+void WorkThread::send_car_id_map()
+{
+    static ZTPManager* ztpm = new ZTPManager;
+    ZTPprotocol ztp;
+    ztp.addPara("T","CAR_ID_MAP");
+    ztp.addPara("GLOBAL_ID",QString::number(ZTools::getCarGlobalID()));
+    ztp.addPara("CAR_ID",QString::number(ZTools::getCarID()));
+    ztpm->SendOneZtp(ztp,QHostAddress("224.102.228.40"),8323);
+}
 void WorkThread::run()
 {
+    car_id_map_timer = new QTimer();
+    car_id_map_timer->setSingleShot(false);
+    car_id_map_timer->setInterval(10000);
+    car_id_map_timer->start();
+    connect(car_id_map_timer,SIGNAL(timeout()),this,SLOT(send_car_id_map()));
     ztpmGetSysIp= new ZTPManager(8866,QHostAddress("224.102.228.40"));
     connect(ztpmGetSysIp,SIGNAL(readyRead()),this,SLOT(recvSysIp()));
     ztpmCarrierHeart = new ZTPManager(8317,QHostAddress("224.102.228.40"));
@@ -440,7 +455,7 @@ void WorkThread::run()
     sendTempTimerId = startTimer(2000);
     //QTimer::singleShot(1000,this,SLOT(test()));
     //ZTools::singleShot(3000,queryTemperature);
-    modbusManager = new ModbusManager("/dev/ttyUSB1",4);
+    modbusManager = new ModbusManager("/dev/ttyUSB1",0);
     modbusDog = new SoftWatchdog(modbusManager,modbusDeal);
     connect(modbusManager,SIGNAL(readyRead()),this,SLOT(recvModbus()),Qt::DirectConnection);//子线程调槽
     bool res = modbusManager->open();

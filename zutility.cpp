@@ -21,9 +21,9 @@ ZUtility::ZUtility()
          ipcNr = 4;
      int x;
      if(ZTools::isForward())
-         x = GlobalInfo::getInstance()->carId;
+         x = ZTools::getCarID();
      else
-         x = 14 - GlobalInfo::getInstance()->carId;
+         x = 14 - ZTools::getCarID();
      sprintf(buf,"rtsp://admin:srt123456@192.168.%d.%d:554/h264/ch1/main/av_stream",x,ipcNr);
     return QString(buf);
 }

@@ -14,11 +14,11 @@
 #include <sys/time.h>
 #include <signal.h>
 using namespace std;
-static int debug = 0;
+
 static void QextSerialPort_init(QextSerialPort *port)
 {
     port->setDtr(false);
-    port->setBaudRate(BAUD19200);
+    port->setBaudRate(BAUD9600);
     port->setFlowControl(FLOW_OFF);
     port->setParity(PAR_EVEN);
     port->setDataBits(DATA_8);
@@ -104,7 +104,7 @@ void ModbusManager::readyData()
     while((tmp = serial->readAll()).length() != 0)
     {
         buff.append(tmp);
-        if(debug)
+        if(0)
         {
             for(int i = 0;i<tmp.length();i++)
             {
@@ -112,7 +112,7 @@ void ModbusManager::readyData()
             }
         }
     }
-    if(debug)
+    if(0)
     {
         QString s_str;
         char c_str[10];
@@ -123,13 +123,10 @@ void ModbusManager::readyData()
         }
         qDebug()<<s_str;
     }
-    if(debug)
-    {
-        qDebug("recv <<<<<<<<<<<<<<<<<<< 1");
-        qDebug()<<"recv :"<<buff;
-    }
+//    qDebug("recv <<<<<<<<<<<<<<<<<<<");
+    //qDebug()<<"recv :"<<buff;
 
-    if(0&&buff.length() < 7)
+    if(buff.length() < 7)
     {
         return;
     }
@@ -231,7 +228,7 @@ void ModbusManager::_setDirection( )
 
 void ModbusManager::SendOneModbus(Modbus& mb)
 {
-    static bool init = true;
+    //static bool init = true;
     mb.generate();
     setDirection(1);
 
@@ -241,13 +238,13 @@ void ModbusManager::SendOneModbus(Modbus& mb)
     bpf = serial->dataBits() + startBits+ (serial->stopBits() == STOP_1?1:2) + (serial->parity() == PAR_NONE ? 0:1);
     delay = bpf * 1000000 * mb.rawData.length() /serial->baudRate() +500;
     modBusManager = this;
-    if(init == true)
-    {
-        init = false;
+    //if(init == true)
+    //{
+    //    init = false;
 //        connect(serial,SIGNAL(bytesWritten(qint64)),this,SLOT(_setDirection(qint64)),Qt::DirectConnection);
 
 //                connect(serial,SIGNAL(sigWriteComplete()),this,SLOT(_setDirection()),Qt::DirectConnection);
-    }
+    //}
 
     //__setDirection();
 //    qDebug("_____2 delay %d",delay);
